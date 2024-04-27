@@ -92,51 +92,133 @@
 
 
 
+// const express = require('express');
+// const multer = require('multer');
+// const path = require('path');
+// const fs = require('fs');
+// const Product = require('./addproduct.js'); // Import the Product model/schema
+
+// const router = express.Router();
+
+// // Configure multer storage
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/'); // Destination folder for uploaded images
+//   },
+//   filename: function (req, file, cb) {
+//     // Generate a unique filename by appending the current timestamp and original file extension
+//     cb(null, Date.now() + '-' + file.originalname);
+//   }
+// });
+
+// // Configure multer limits
+// const limits = {
+//   fileSize: 5 * 1024 * 1024, // 5MB file size limit
+// };
+
+// // Configure multer file type filter
+// const fileFilter = (req, file, cb) => {
+//   // Allowed file types
+//   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+//   if (allowedTypes.includes(file.mimetype)) {
+//     cb(null, true);
+//   } else {
+//     cb(new Error('Invalid file type. Only JPEG, PNG, and GIF files are allowed.'));
+//   }
+// };
+
+// const upload = multer({ 
+//   storage: storage,
+//   limits: limits,
+//   fileFilter: fileFilter
+// }).single('image');
+
+// // Multer error handler middleware
+// router.use(function(err, req, res, next) {
+//   if (err instanceof multer.MulterError) {
+//     // A Multer error occurred when uploading
+//     console.error('Multer error:', err);
+//     if (err.code === 'LIMIT_FILE_SIZE') {
+//       return res.status(400).json({ error: 'File size too large. Maximum 5MB allowed.' });
+//     } else {
+//       return res.status(400).json({ error: 'File upload error' });
+//     }
+//   } else if (err) {
+//     // An unknown error occurred
+//     console.error('Unknown error:', err);
+//     res.status(500).json({ error: 'Internal server error' });
+//   } else {
+//     next(); // No multer error, continue to next middleware
+//   }
+// });
+
+// // Upload endpoint
+// router.post('/upload', (req, res) => {
+//   upload(req, res, async (err) => {
+//     if (err) {
+//       // Multer middleware encountered an error
+//       console.error('Multer error:', err);
+//       return res.status(400).json({ error: 'File upload error' });
+//     }
+
+//     // File uploaded successfully, proceed with handling other form data
+//     try {
+//       const { title, price, description, quantity } = req.body;
+//       const image = req.file.filename;
+
+//       const product = new Product({
+//         title,
+//         price,
+//         description,
+//         quantity,
+//         image
+//       });
+
+//       // Attempt to save the product to the database
+//       await product.save();
+
+//       // If successful, send a success response
+//       res.status(200).json({ message: 'Product added successfully' });
+//     } catch (error) {
+//       // If there's an error with the database operation, handle it here
+//       console.error('Error occurred while adding product:', error);
+//       // Check if the error is related to database connectivity
+//       if (error.name === 'MongoError' && error.message.includes('Topology was destroyed')) {
+//         // If database connectivity error, send a specific error message
+//         res.status(500).json({ error: 'Database connectivity issue. Please try again later.' });
+//       } else {
+//         // Otherwise, send a generic internal server error
+//         res.status(500).json({ error: 'Internal server error' });
+//       }
+//     }
+//   });
+// });
+
+// module.exports = router;
+
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
 const fs = require('fs');
-const Product = require('./addproduct.js'); // Import the Product model/schema
+const path = require('path');
 
 const router = express.Router();
 
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Destination folder for uploaded images
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    // Generate a unique filename by appending the current timestamp and original file extension
     cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
-// Configure multer limits
-const limits = {
-  fileSize: 5 * 1024 * 1024, // 5MB file size limit
-};
-
-// Configure multer file type filter
-const fileFilter = (req, file, cb) => {
-  // Allowed file types
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, and GIF files are allowed.'));
-  }
-};
-
-const upload = multer({ 
-  storage: storage,
-  limits: limits,
-  fileFilter: fileFilter
-}).single('image');
+// Multer upload middleware
+const upload = multer({ storage: storage }).single('image');
 
 // Multer error handler middleware
 router.use(function(err, req, res, next) {
   if (err instanceof multer.MulterError) {
-    // A Multer error occurred when uploading
     console.error('Multer error:', err);
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ error: 'File size too large. Maximum 5MB allowed.' });
@@ -144,7 +226,6 @@ router.use(function(err, req, res, next) {
       return res.status(400).json({ error: 'File upload error' });
     }
   } else if (err) {
-    // An unknown error occurred
     console.error('Unknown error:', err);
     res.status(500).json({ error: 'Internal server error' });
   } else {
@@ -156,42 +237,40 @@ router.use(function(err, req, res, next) {
 router.post('/upload', (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
-      // Multer middleware encountered an error
       console.error('Multer error:', err);
       return res.status(400).json({ error: 'File upload error' });
     }
 
-    // File uploaded successfully, proceed with handling other form data
     try {
       const { title, price, description, quantity } = req.body;
       const image = req.file.filename;
 
-      const product = new Product({
-        title,
-        price,
-        description,
-        quantity,
-        image
-      });
+      // Here, you would save the product details to your database
 
-      // Attempt to save the product to the database
-      await product.save();
-
-      // If successful, send a success response
       res.status(200).json({ message: 'Product added successfully' });
     } catch (error) {
-      // If there's an error with the database operation, handle it here
       console.error('Error occurred while adding product:', error);
-      // Check if the error is related to database connectivity
-      if (error.name === 'MongoError' && error.message.includes('Topology was destroyed')) {
-        // If database connectivity error, send a specific error message
-        res.status(500).json({ error: 'Database connectivity issue. Please try again later.' });
-      } else {
-        // Otherwise, send a generic internal server error
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 });
 
+// GET endpoint to fetch images
+router.get('/images', (req, res) => {
+  const directoryPath = path.join(__dirname, 'uploads');
+
+  fs.readdir(directoryPath, function(err, files) {
+    if (err) {
+      console.error('Error reading directory:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const images = files.filter(file => file.endsWith('.jpg') || file.endsWith('.jpeg') || file.endsWith('.png') || file.endsWith('.gif'));
+
+    // Assuming you want to send the list of image filenames to the client
+    res.status(200).json({ images });
+  });
+});
+
 module.exports = router;
+

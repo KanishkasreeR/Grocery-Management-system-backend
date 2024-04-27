@@ -7,7 +7,7 @@ const app = express()
 app.use(bodyparser.json())
 app.use(cors()) 
 
-app.use('/', uploadRouter);
+app.use('/api', uploadRouter);
 
 async function connectDB(){
 try{

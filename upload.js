@@ -135,6 +135,29 @@ router.use(function(err, req, res, next) {
 });
 
 // Upload endpoint
+// router.post('/upload', (req, res) => {
+//   upload(req, res, async (err) => {
+//     if (err) {
+//       // Multer middleware encountered an error
+//       console.error('Multer error:', err);
+//       return res.status(400).json({ error: 'File upload error' });
+//     }
+    
+//     // Image uploaded successfully, continue with product creation
+//     try {
+//       const { title, price, description, quantity } = req.body;
+//       const image = req.file.filename;
+//       const product = new Product({ title, price, description, quantity, image });
+//       await product.save();
+//       res.status(200).json({ message: 'Product added successfully' });
+//     } catch (error) {
+//       console.error('Error occurred while adding product:', error);
+//       res.status(500).json({ error: 'Internal server error' });
+//     }
+//   });
+// });
+
+// Upload endpoint
 router.post('/upload', (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -142,13 +165,22 @@ router.post('/upload', (req, res) => {
       console.error('Multer error:', err);
       return res.status(400).json({ error: 'File upload error' });
     }
-    
-    // Image uploaded successfully, continue with product creation
+
+    // File uploaded successfully, proceed with handling other form data
     try {
       const { title, price, description, quantity } = req.body;
       const image = req.file.filename;
-      const product = new Product({ title, price, description, quantity, image });
+
+      const product = new Product({
+        title,
+        price,
+        description,
+        quantity,
+        image
+      });
+
       await product.save();
+
       res.status(200).json({ message: 'Product added successfully' });
     } catch (error) {
       console.error('Error occurred while adding product:', error);
@@ -156,6 +188,7 @@ router.post('/upload', (req, res) => {
     }
   });
 });
+
 
 module.exports = router;
 

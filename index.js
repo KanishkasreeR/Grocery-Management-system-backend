@@ -7,6 +7,8 @@ const app = express()
 app.use(bodyparser.json())
 app.use(cors()) 
 
+app.use('/', uploadRouter);
+
 async function connectDB(){
 try{
         await mongoos.connect('mongodb+srv://kanishka:Aqpfk15rpTGS578W@cluster05.pgwmpx4.mongodb.net/GroceryApplication?retryWrites=true&w=majority&appName=Cluster05')

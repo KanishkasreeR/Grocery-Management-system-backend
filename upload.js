@@ -1,40 +1,55 @@
-import multer from 'multer';
-import path from 'path';
+// const express = require('express');
+// const multer = require('multer');
+// const path = require('path');
 
-// Set storage engine
+// const app = express();
+
+// // Set up multer storage engine
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/'); // Destination folder for uploaded images
+//   },
+//   filename: function (req, file, cb) {
+//     // Generate a unique filename by appending the current timestamp and original file extension
+//     cb(null, Date.now() + '-' + file.originalname);
+//   }
+// });
+
+// // Initialize multer with the configured storage engine
+// const upload = multer({ storage: storage });
+
+// // POST endpoint to handle file uploads
+// app.post('/upload', upload.single('image'), (req, res) => {
+//   // If the file is successfully uploaded, send a success response
+//   res.status(200).json({ message: 'File uploaded successfully' });
+// });
+
+// module.exports = app;
+
+const express = require('express');
+const multer = require('multer');
+const router = express.Router();
+
+// Set up multer storage engine
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/'); // Destination folder for uploaded images
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // Use a unique filename
+    // Generate a unique filename by appending the current timestamp and original file extension
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
-// Init Upload
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 1000000 }, // File size limit (1MB)
-  fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
-  }
-}).single('image'); // The name attribute of the file input field
+// Initialize multer with the configured storage engine
+const upload = multer({ storage: storage });
 
-// Check File Type
-function checkFileType(file, cb) {
-  // Allowed file extensions
-  const filetypes = /jpeg|jpg|png/;
-  // Check the extension
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  // Check the MIME type
-  const mimetype = filetypes.test(file.mimetype);
+// POST endpoint to handle file uploads
+router.post('/upload', upload.single('image'), (req, res) => {
+  // If the file is successfully uploaded, send a success response
+  res.status(200).json({ message: 'File uploaded successfully' });
+});
 
-  if (mimetype && extname) {
-    return cb(null, true);
-  } else {
-    cb('Error: Images only!');
-  }
-}
+module.exports = router;
 
-export default upload;
+

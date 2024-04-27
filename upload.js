@@ -52,11 +52,11 @@
 
 // module.exports = router;
 
-import express from 'express';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import Product from './addproduct'; // Import the Product model/schema
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const Product = require('./addproduct'); // Import the Product model/schema
 
 const router = express.Router();
 
@@ -97,7 +97,8 @@ router.post('/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
+
 
 
 

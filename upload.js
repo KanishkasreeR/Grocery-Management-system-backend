@@ -174,17 +174,24 @@ router.post('/upload', (req, res) => {
         image
       });
 
+      // Attempt to save the product to the database
       await product.save();
 
+      // If successful, send a success response
       res.status(200).json({ message: 'Product added successfully' });
     } catch (error) {
+      // If there's an error with the database operation, handle it here
       console.error('Error occurred while adding product:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      // Check if the error is related to database connectivity
+      if (error.name === 'MongoError' && error.message.includes('Topology was destroyed')) {
+        // If database connectivity error, send a specific error message
+        res.status(500).json({ error: 'Database connectivity issue. Please try again later.' });
+      } else {
+        // Otherwise, send a generic internal server error
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
   });
 });
 
 module.exports = router;
-
-
-

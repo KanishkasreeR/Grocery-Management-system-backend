@@ -104,7 +104,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const Product = require('./addproduct'); // Import the Product model/schema
+const Product = require('./addproduct.js'); // Import the Product model/schema
 
 const router = express.Router();
 

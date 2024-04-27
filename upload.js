@@ -1,42 +1,40 @@
-// import multer from 'multer';
-// import { GridFsStorage } from 'multer-gridfs-storage';
-
-// const storage = new GridFsStorage({
-//     url: `mongodb+srv://kanishka:Aqpfk15rpTGS578W@cluster05.pgwmpx4.mongodb.net/GroceryApplication?retryWrites=true&w=majority&appName=Cluster05`,
-//     options: { useNewUrlParser: true },
-//     file: (request, file) => {
-//         const match = ["image/png", "image/jpg"];
-
-//         if(match.indexOf(file.memeType) === -1) 
-//             return`${Date.now()}-blog-${file.originalname}`;
-
-//         return {
-//             bucketName: "photos",
-//             filename: `${Date.now()}-blog-${file.originalname}`
-//         }
-//     }
-// });
-
-// export default multer({storage}); 
-
 import multer from 'multer';
-import { GridFsStorage } from 'multer-gridfs-storage';
 import path from 'path';
 
-const storage = new GridFsStorage({
-    url: `mongodb+srv://kanishka:Aqpfk15rpTGS578W@cluster05.pgwmpx4.mongodb.net/GroceryApplication?retryWrites=true&w=majority&appName=Cluster05`,
-    options: { useNewUrlParser: true },
-    file: (request, file) => {
-        const match = ["image/png", "image/jpg"];
-
-        if (match.indexOf(file.memeType) === -1) 
-            return path.join(__dirname, `uploads/${Date.now()}-blog-${file.originalname}`);
-
-        return {
-            bucketName: "photos",
-            filename: `${Date.now()}-blog-${file.originalname}`
-        }
-    }
+// Set storage engine
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Destination folder for uploaded images
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // Use a unique filename
+  }
 });
 
-export default multer({ storage });
+// Init Upload
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1000000 }, // File size limit (1MB)
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  }
+}).single('image'); // The name attribute of the file input field
+
+// Check File Type
+function checkFileType(file, cb) {
+  // Allowed file extensions
+  const filetypes = /jpeg|jpg|png/;
+  // Check the extension
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Check the MIME type
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb('Error: Images only!');
+  }
+}
+
+export default upload;

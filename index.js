@@ -2,7 +2,7 @@ const express = require('express')
 const mongoos = require('mongoose')
 const bodyparser = require('body-parser')
 const cors = require('cors')
-
+const uploadRouter = require('./upload');
 const app = express()
 app.use(bodyparser.json())
 app.use(cors()) 

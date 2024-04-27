@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoos = require('mongoose')
 
 const ProductSchema = mongoose.Schema({
     title: {

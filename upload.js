@@ -456,5 +456,61 @@ router.get('/products', async (req, res) => {
   }
 });
 
+router.patch('/editproduct/:id', async (req, res) => {
+  try {
+    const { productName, price, description, quantity, category } = req.body;
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {
+      productName,
+      price,
+      description,
+      quantity,
+      category
+    }, { new: true }); // Set new: true to return the updated document
+
+    if (!updatedProduct) {
+      return res.status(404).json({ status: 'failure', message: 'Product not found' });
+    }
+
+    res.status(200).json({ status: 'success', message: 'Product updated successfully', product: updatedProduct });
+  } catch (error) {
+    console.error('Error occurred while updating product:', error);
+    res.status(500).json({ status: 'failure', message: 'Could not update product', error: error });
+  }
+});
+
+// Delete product endpoint
+router.delete('/deleteproduct/:id', async (req, res) => {
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ status: 'failure', message: 'Product not found' });
+    }
+
+    res.status(200).json({ status: 'success', message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error occurred while deleting product:', error);
+    res.status(500).json({ status: 'failure', message: 'Could not delete product', error: error });
+  }
+});
+
+// Search products endpoint
+router.get('/search', async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    const products = await Product.find({
+      $or: [
+        { productName: { $regex: keyword, $options: 'i' } }, // Case-insensitive search for product name
+        { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search for description
+      ]
+    });
+
+    res.status(200).json({ status: 'success', products: products });
+  } catch (error) {
+    console.error('Error occurred while searching products:', error);
+    res.status(500).json({ status: 'failure', message: 'Could not search products', error: error });
+  }
+});
+
 module.exports = router;
 

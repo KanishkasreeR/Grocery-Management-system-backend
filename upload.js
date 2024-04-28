@@ -354,17 +354,29 @@ router.post('/upload', (req, res) => {
   });
 });
 
-router.get('/images/:productId', async (req, res) => {
+// router.get('/images/:productId', async (req, res) => {
+//   try {
+//     const productId = req.params.productId;
+//     const product = await Product.findById(productId);
+//     if (!product) {
+//       return res.status(404).json({ error: 'Product not found' });
+//     }
+//     const imageUrls = product.imageUrl; // Assuming 'imageUrl' is the field storing Cloudinary URLs
+//     res.status(200).json({ imageUrls });
+//   } catch (error) {
+//     console.error('Error occurred while retrieving images for product:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
+
+// 
+
+router.get('/products', async (req, res) => {
   try {
-    const productId = req.params.productId;
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-    const imageUrls = product.imageUrl; // Assuming 'imageUrl' is the field storing Cloudinary URLs
-    res.status(200).json({ imageUrls });
+    const products = await Product.find(); // Retrieve all products
+    res.status(200).json({ products });
   } catch (error) {
-    console.error('Error occurred while retrieving images for product:', error);
+    console.error('Error occurred while retrieving products:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

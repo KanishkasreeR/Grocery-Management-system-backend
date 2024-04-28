@@ -41,6 +41,7 @@ const productSchema = new mongoose.Schema({
   price: Number,
   description: String,
   quantity: Number,
+  category : String,
   imageUrl: String // Add imageUrl field for storing Cloudinary URL
 });
 

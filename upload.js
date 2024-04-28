@@ -456,16 +456,49 @@ router.get('/products', async (req, res) => {
   }
 });
 
+// router.patch('/editproduct/:id', async (req, res) => {
+//   try {
+//     const { productName, price, description, quantity, category } = req.body;
+//     const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {
+//       productName,
+//       price,
+//       description,
+//       quantity,
+//       category
+//     }, { new: true }); // Set new: true to return the updated document
+
+//     if (!updatedProduct) {
+//       return res.status(404).json({ status: 'failure', message: 'Product not found' });
+//     }
+
+//     res.status(200).json({ status: 'success', message: 'Product updated successfully', product: updatedProduct });
+//   } catch (error) {
+//     console.error('Error occurred while updating product:', error);
+//     res.status(500).json({ status: 'failure', message: 'Could not update product', error: error });
+//   }
+// });
+
+// PATCH route to edit product details
 router.patch('/editproduct/:id', async (req, res) => {
   try {
-    const { productName, price, description, quantity, category } = req.body;
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {
+    const { productName, price, description, quantity, category, imageUrl } = req.body;
+
+    // Prepare the update object
+    const updateFields = {
       productName,
       price,
       description,
       quantity,
       category
-    }, { new: true }); // Set new: true to return the updated document
+    };
+
+    // If imageUrl is provided, update the image as well
+    if (imageUrl) {
+      updateFields.imageUrl = imageUrl;
+    }
+
+    // Update the product
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateFields, { new: true });
 
     if (!updatedProduct) {
       return res.status(404).json({ status: 'failure', message: 'Product not found' });
@@ -477,6 +510,21 @@ router.patch('/editproduct/:id', async (req, res) => {
     res.status(500).json({ status: 'failure', message: 'Could not update product', error: error });
   }
 });
+
+// GET route to fetch a particular product by ID
+router.get('/product/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ status: 'failure', message: 'Product not found' });
+    }
+    res.status(200).json({ status: 'success', product });
+  } catch (error) {
+    console.error('Error occurred while fetching product:', error);
+    res.status(500).json({ status: 'failure', message: 'Could not fetch product', error: error });
+  }
+});
+
 
 // Delete product endpoint
 router.delete('/deleteproduct/:id', async (req, res) => {

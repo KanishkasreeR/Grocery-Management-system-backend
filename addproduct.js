@@ -34,18 +34,50 @@
 // module.exports = Product;
 
 // addproduct.js
+// const mongoose = require('mongoose');
+
+// const productSchema = new mongoose.Schema({
+//   title: String,
+//   price: Number,
+//   description: String,
+//   quantity: Number,
+//   category : String,
+//   imageUrl: String // Add imageUrl field for storing Cloudinary URL
+// });
+
+// const Product = mongoose.model('Product', productSchema);
+
+// module.exports = Product;
+
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-  title: String,
-  price: Number,
-  description: String,
-  quantity: Number,
-  category : String,
-  imageUrl: String // Add imageUrl field for storing Cloudinary URL
+    productName: {
+        type: String,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    quantity: {
+        type: String, // Changed to string to accommodate both string and numeric values
+        required: true
+    },
+    category: {
+        type: String
+    },
+    imageUrl: {
+        type: String
+    }
 });
 
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
+
 

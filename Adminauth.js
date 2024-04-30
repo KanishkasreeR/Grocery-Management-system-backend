@@ -6,47 +6,96 @@ const auth = require("./authentication");
 const Admin = require("./Adminmodel"); // Update to Admin model
 
 // Register Route
+// router.post("/Adminregister", async (req, res) => {
+//   const { name, email, password } = req.body;
+
+//   if (!name || !email || !password) {
+//     return res.status(400).json({ error: `Please enter all the required fields.` });
+//   }
+
+//   if (name.length > 25) {
+//     return res.status(400).json({ error: "Name can only be less than 25 characters" });
+//   }
+
+//   const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//   if (!emailReg.test(email)) {
+//     return res.status(400).json({ error: "Please enter a valid email address." });
+//   }
+
+//   if (password.length < 6) {
+//     return res.status(400).json({ error: "Password must be at least 6 characters long" });
+//   }
+
+//   try {
+//     const doesAdminAlreadyExist = await Admin.findOne({ email });
+
+//     if (doesAdminAlreadyExist) {
+//       return res.status(400).json({
+//         error: `An admin with email ${email} already exists. Please use a different email.`,
+//       });
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 12);
+//     const newAdmin = new Admin({ name, email, password: hashedPassword });
+
+//     const result = await newAdmin.save();
+//     result._doc.password = undefined;
+
+//     return res.status(201).json({ ...result._doc });
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: err.message });
+//   }
+// });
+
 router.post("/Adminregister", async (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: `Please enter all the required fields.` });
-  }
-
-  if (name.length > 25) {
-    return res.status(400).json({ error: "Name can only be less than 25 characters" });
-  }
-
-  const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailReg.test(email)) {
-    return res.status(400).json({ error: "Please enter a valid email address." });
-  }
-
-  if (password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters long" });
-  }
-
-  try {
-    const doesAdminAlreadyExist = await Admin.findOne({ email });
-
-    if (doesAdminAlreadyExist) {
-      return res.status(400).json({
-        error: `An admin with email ${email} already exists. Please use a different email.`,
-      });
+    const { name, email, password, storeName, storeAddress, contactNumber } = req.body;
+  
+    if (!name || !email || !password || !storeName || !storeAddress || !contactNumber) {
+      return res.status(400).json({ error: `Please enter all the required fields.` });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const newAdmin = new Admin({ name, email, password: hashedPassword });
-
-    const result = await newAdmin.save();
-    result._doc.password = undefined;
-
-    return res.status(201).json({ ...result._doc });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: err.message });
-  }
-});
+  
+    if (name.length > 25) {
+      return res.status(400).json({ error: "Name can only be less than 25 characters" });
+    }
+  
+    const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailReg.test(email)) {
+      return res.status(400).json({ error: "Please enter a valid email address." });
+    }
+  
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+  
+    // Regular expression to validate Indian mobile number format
+    const mobileNumberRegEx = /^[6-9]\d{9}$/;
+    if (!mobileNumberRegEx.test(contactNumber)) {
+      return res.status(400).json({ error: "Please enter a valid Indian mobile number." });
+    }
+  
+    try {
+      const doesAdminAlreadyExist = await Admin.findOne({ email });
+  
+      if (doesAdminAlreadyExist) {
+        return res.status(400).json({
+          error: `An admin with email ${email} already exists. Please use a different email.`,
+        });
+      }
+  
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const newAdmin = new Admin({ name, email, password: hashedPassword, storeName, storeAddress, contactNumber });
+  
+      const result = await newAdmin.save();
+      result._doc.password = undefined;
+  
+      return res.status(201).json({ ...result._doc });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.message });
+    }
+  });
+  
 
 // Login Route
 router.post("/Adminlogin", async (req, res) => {

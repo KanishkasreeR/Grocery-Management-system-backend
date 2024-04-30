@@ -3,11 +3,13 @@ const mongoos = require('mongoose')
 const bodyparser = require('body-parser')
 const cors = require('cors')
 const uploadRouter = require('./upload');
+const AdminRouter = require('./Adminauth');
 const app = express()
 app.use(bodyparser.json())
 app.use(cors()) 
 
 app.use('/api', uploadRouter);
+app.use('/api', AdminRouter);
 
 async function connectDB(){
 try{

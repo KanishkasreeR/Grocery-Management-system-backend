@@ -628,9 +628,36 @@ router.delete('/deleteproduct/:id', async (req, res) => {
 //   }
 // });
 
+// router.get('/search', async (req, res) => {
+//   try {
+//     const { keyword, category } = req.query;
+//     let query = {};
+
+//     // If keyword is provided, perform keyword search
+//     if (keyword) {
+//       query.$or = [
+//         { productName: { $regex: keyword, $options: 'i' } }, // Case-insensitive search for product name
+//         { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search for description
+//       ];
+//     }
+
+//     // If category is provided, filter by category
+//     if (category) {
+//       query.category = category;
+//     }
+
+//     const products = await Product.find(query);
+
+//     res.status(200).json({ status: 'success', products });
+//   } catch (error) {
+//     console.error('Error occurred while searching products:', error);
+//     res.status(500).json({ status: 'failure', message: 'Could not search products', error });
+//   }
+// });
+
 router.get('/search', async (req, res) => {
   try {
-    const { keyword, category } = req.query;
+    const { keyword, category, adminId } = req.query;
     let query = {};
 
     // If keyword is provided, perform keyword search
@@ -646,6 +673,11 @@ router.get('/search', async (req, res) => {
       query.category = category;
     }
 
+    // If adminId is provided, filter by adminId
+    if (adminId) {
+      query.adminId = adminId;
+    }
+
     const products = await Product.find(query);
 
     res.status(200).json({ status: 'success', products });
@@ -654,6 +686,7 @@ router.get('/search', async (req, res) => {
     res.status(500).json({ status: 'failure', message: 'Could not search products', error });
   }
 });
+
 
 
 module.exports = router;

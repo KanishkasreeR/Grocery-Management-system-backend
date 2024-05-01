@@ -446,41 +446,76 @@ router.use(function(err, req, res, next) {
 //   });
 // });
 
+// router.post('/upload', (req, res) => {
+//   upload(req, res, async (err) => {
+//     if (err) {
+//       console.error('Multer error:', err);
+//       return res.status(400).json({ error: 'File upload error' });
+//     }
+
+//     try {
+//       const { productName, adminId, prices, description, category } = req.body;
+//       const image = req.file.path; // Path to the uploaded image file
+
+//       // Upload image to Cloudinary
+//       const cloudinaryResponse = await cloudinary.uploader.upload(image);
+
+//       // Convert prices from string to array of objects
+//       const pricesArray = JSON.parse(prices);
+
+//       // Save product details to database
+//       const product = new Product({
+//         productName,
+//         adminId, // Use the adminId received from frontend
+//         prices: pricesArray,
+//         description,
+//         category,
+//         imageUrl: cloudinaryResponse.url // Store the image URL from Cloudinary
+//       });
+//       await product.save();
+
+//       res.status(200).json({ message: 'Product added successfully' });
+//     } catch (error) {
+//       console.error('Error occurred while adding product:', error);
+//       res.status(500).json({ error: 'Internal server error' });
+//     }
+//   });
+// });
+
 router.post('/upload', (req, res) => {
   upload(req, res, async (err) => {
-    if (err) {
-      console.error('Multer error:', err);
-      return res.status(400).json({ error: 'File upload error' });
-    }
+      if (err) {
+          console.error('Multer error:', err);
+          return res.status(400).json({ error: 'File upload error' });
+      }
 
-    try {
-      const { productName, adminId, prices, description, category } = req.body;
-      const image = req.file.path; // Path to the uploaded image file
+      try {
+          const { productName, adminId, price, quantity, description, category } = req.body;
+          const image = req.file.path; // Path to the uploaded image file
 
-      // Upload image to Cloudinary
-      const cloudinaryResponse = await cloudinary.uploader.upload(image);
+          // Upload image to Cloudinary
+          const cloudinaryResponse = await cloudinary.uploader.upload(image);
 
-      // Convert prices from string to array of objects
-      const pricesArray = JSON.parse(prices);
+          // Save product details to database
+          const product = new Product({
+              productName,
+              adminId, // Use the adminId received from frontend
+              price,
+              quantity,
+              description,
+              category,
+              imageUrl: cloudinaryResponse.url // Store the image URL from Cloudinary
+          });
+          await product.save();
 
-      // Save product details to database
-      const product = new Product({
-        productName,
-        adminId, // Use the adminId received from frontend
-        prices: pricesArray,
-        description,
-        category,
-        imageUrl: cloudinaryResponse.url // Store the image URL from Cloudinary
-      });
-      await product.save();
-
-      res.status(200).json({ message: 'Product added successfully' });
-    } catch (error) {
-      console.error('Error occurred while adding product:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+          res.status(200).json({ message: 'Product added successfully' });
+      } catch (error) {
+          console.error('Error occurred while adding product:', error);
+          res.status(500).json({ error: 'Internal server error' });
+      }
   });
 });
+
 
 
 // router.get('/products', async (req, res) => {

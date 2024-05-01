@@ -49,6 +49,38 @@
 
 // module.exports = Product;
 
+// const mongoose = require('mongoose');
+
+// const productSchema = new mongoose.Schema({
+//     productName: {
+//         type: String,
+//         required: true
+//     },
+//     price: {
+//         type: Number,
+//         required: true
+//     },
+//     description: {
+//         type: String,
+//         required: true
+//     },
+//     quantity: {
+//         type: String, // Changed to string to accommodate both string and numeric values
+//         required: true
+//     },
+//     category: {
+//         type: String
+//     },
+//     imageUrl: {
+//         type: String
+//     }
+// });
+
+// const Product = mongoose.model('Product', productSchema);
+
+// module.exports = Product;
+
+
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
@@ -56,16 +88,22 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    price: {
-        type: Number,
+    adminId: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true
     },
+    prices: [{
+        price: {
+            type: Number,
+            required: true
+        },
+        quantity: {
+            type: String, // Quantity stored as a string
+            required: true
+        }
+    }],
     description: {
         type: String,
-        required: true
-    },
-    quantity: {
-        type: String, // Changed to string to accommodate both string and numeric values
         required: true
     },
     category: {

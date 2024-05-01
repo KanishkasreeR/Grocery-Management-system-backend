@@ -413,6 +413,39 @@ router.use(function(err, req, res, next) {
 });
 
 // Upload endpoint
+// router.post('/upload', (req, res) => {
+//   upload(req, res, async (err) => {
+//     if (err) {
+//       console.error('Multer error:', err);
+//       return res.status(400).json({ error: 'File upload error' });
+//     }
+
+//     try {
+//       const { productName, price, description, quantity, category } = req.body;
+//       const image = req.file.path; // Path to the uploaded image file
+
+//       // Upload image to Cloudinary
+//       const cloudinaryResponse = await cloudinary.uploader.upload(image);
+
+//       // Save product details to database
+//       const product = new Product({
+//         productName,
+//         price,
+//         description,
+//         quantity,
+//         category,
+//         imageUrl: cloudinaryResponse.url // Store the image URL from Cloudinary
+//       });
+//       await product.save();
+
+//       res.status(200).json({ message: 'Product added successfully' });
+//     } catch (error) {
+//       console.error('Error occurred while adding product:', error);
+//       res.status(500).json({ error: 'Internal server error' });
+//     }
+//   });
+// });
+
 router.post('/upload', (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -421,18 +454,21 @@ router.post('/upload', (req, res) => {
     }
 
     try {
-      const { productName, price, description, quantity, category } = req.body;
+      const { productName, adminId, prices, description, category } = req.body;
       const image = req.file.path; // Path to the uploaded image file
 
       // Upload image to Cloudinary
       const cloudinaryResponse = await cloudinary.uploader.upload(image);
 
+      // Convert prices from string to array of objects
+      const pricesArray = JSON.parse(prices);
+
       // Save product details to database
       const product = new Product({
         productName,
-        price,
+        adminId, // Use the adminId received from frontend
+        prices: pricesArray,
         description,
-        quantity,
         category,
         imageUrl: cloudinaryResponse.url // Store the image URL from Cloudinary
       });
@@ -446,9 +482,27 @@ router.post('/upload', (req, res) => {
   });
 });
 
+
+// router.get('/products', async (req, res) => {
+//   try {
+//     const products = await Product.find(); // Retrieve all products
+//     res.status(200).json({ products });
+//   } catch (error) {
+//     console.error('Error occurred while retrieving products:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
+
 router.get('/products', async (req, res) => {
   try {
-    const products = await Product.find(); // Retrieve all products
+    const { adminId } = req.query; // Get adminId from query parameters
+
+    // Check if adminId is provided
+    if (!adminId) {
+      return res.status(400).json({ error: 'Admin ID is required' });
+    }
+
+    const products = await Product.find({ adminId }); // Retrieve products for the specified adminId
     res.status(200).json({ products });
   } catch (error) {
     console.error('Error occurred while retrieving products:', error);
@@ -456,27 +510,6 @@ router.get('/products', async (req, res) => {
   }
 });
 
-// router.patch('/editproduct/:id', async (req, res) => {
-//   try {
-//     const { productName, price, description, quantity, category } = req.body;
-//     const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {
-//       productName,
-//       price,
-//       description,
-//       quantity,
-//       category
-//     }, { new: true }); // Set new: true to return the updated document
-
-//     if (!updatedProduct) {
-//       return res.status(404).json({ status: 'failure', message: 'Product not found' });
-//     }
-
-//     res.status(200).json({ status: 'success', message: 'Product updated successfully', product: updatedProduct });
-//   } catch (error) {
-//     console.error('Error occurred while updating product:', error);
-//     res.status(500).json({ status: 'failure', message: 'Could not update product', error: error });
-//   }
-// });
 
 // PATCH route to edit product details
 router.patch('/editproduct/:id', async (req, res) => {
@@ -543,22 +576,50 @@ router.delete('/deleteproduct/:id', async (req, res) => {
 });
 
 // Search products endpoint
+// router.get('/search', async (req, res) => {
+//   try {
+//     const { keyword } = req.query;
+//     const products = await Product.find({
+//       $or: [
+//         { productName: { $regex: keyword, $options: 'i' } }, // Case-insensitive search for product name
+//         { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search for description
+//       ]
+//     });
+
+//     res.status(200).json({ status: 'success', products: products });
+//   } catch (error) {
+//     console.error('Error occurred while searching products:', error);
+//     res.status(500).json({ status: 'failure', message: 'Could not search products', error: error });
+//   }
+// });
+
 router.get('/search', async (req, res) => {
   try {
-    const { keyword } = req.query;
-    const products = await Product.find({
-      $or: [
+    const { keyword, category } = req.query;
+    let query = {};
+
+    // If keyword is provided, perform keyword search
+    if (keyword) {
+      query.$or = [
         { productName: { $regex: keyword, $options: 'i' } }, // Case-insensitive search for product name
         { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search for description
-      ]
-    });
+      ];
+    }
 
-    res.status(200).json({ status: 'success', products: products });
+    // If category is provided, filter by category
+    if (category) {
+      query.category = category;
+    }
+
+    const products = await Product.find(query);
+
+    res.status(200).json({ status: 'success', products });
   } catch (error) {
     console.error('Error occurred while searching products:', error);
-    res.status(500).json({ status: 'failure', message: 'Could not search products', error: error });
+    res.status(500).json({ status: 'failure', message: 'Could not search products', error });
   }
 });
+
 
 module.exports = router;
 

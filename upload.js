@@ -549,7 +549,7 @@ router.get('/products', async (req, res) => {
 // PATCH route to edit product details
 router.patch('/editproduct/:id', async (req, res) => {
   try {
-    const { productName, price, description, quantity, category, imageUrl } = req.body;
+    const { productName, price, description, quantity, category } = req.body;
 
     // Prepare the update object
     const updateFields = {
@@ -559,11 +559,6 @@ router.patch('/editproduct/:id', async (req, res) => {
       quantity,
       category
     };
-
-    // If imageUrl is provided, update the image as well
-    if (imageUrl) {
-      updateFields.imageUrl = imageUrl;
-    }
 
     // Update the product
     const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateFields, { new: true });
@@ -579,19 +574,6 @@ router.patch('/editproduct/:id', async (req, res) => {
   }
 });
 
-// GET route to fetch a particular product by ID
-router.get('/product/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ status: 'failure', message: 'Product not found' });
-    }
-    res.status(200).json({ status: 'success', product });
-  } catch (error) {
-    console.error('Error occurred while fetching product:', error);
-    res.status(500).json({ status: 'failure', message: 'Could not fetch product', error: error });
-  }
-});
 
 
 // Delete product endpoint
@@ -609,36 +591,6 @@ router.delete('/deleteproduct/:id', async (req, res) => {
     res.status(500).json({ status: 'failure', message: 'Could not delete product', error: error });
   }
 });
-
-
-
-// router.get('/search', async (req, res) => {
-//   try {
-//     const { keyword, category } = req.query;
-//     let query = {};
-
-//     // If keyword is provided, perform keyword search
-//     if (keyword) {
-//       query.$or = [
-//         { productName: { $regex: keyword, $options: 'i' } }, // Case-insensitive search for product name
-//         { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search for description
-//       ];
-//     }
-
-//     // If category is provided, filter by category
-//     if (category) {
-//       query.category = category;
-//     }
-
-//     const products = await Product.find(query);
-
-//     res.status(200).json({ status: 'success', products });
-//   } catch (error) {
-//     console.error('Error occurred while searching products:', error);
-//     res.status(500).json({ status: 'failure', message: 'Could not search products', error });
-//   }
-// });
-
 
 router.get('/search', async (req, res) => {
   try {
@@ -661,6 +613,26 @@ router.get('/search', async (req, res) => {
   }
 });
 
+router.get('/admin', async (req, res) => {
+  try {
+    const { adminId } = req.query; // Get adminId from query parameters
+
+    // Check if adminId is provided
+    if (!adminId) {
+      return res.status(400).json({ error: 'Admin ID is required' });
+    }
+
+    const admin = await Admin.findById(adminId); // Retrieve admin details for the specified adminId
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    res.status(200).json({ admin });
+  } catch (error) {
+    console.error('Error occurred while retrieving admin details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 

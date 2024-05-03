@@ -389,16 +389,24 @@ router.post("/Userlogin", async (req, res) => {
   }
 });
 
-router.get('/admin/:adminid', async (req, res) => {
-  const adminid = req.params.adminid;
+router.get('/admin', async (req, res) => {
   try {
-    const admin = await Admin.findOne({ adminid: adminid });
-    if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
+    const { adminId } = req.query; // Get adminId from query parameters
+
+    // Check if adminId is provided
+    if (!adminId) {
+      return res.status(400).json({ error: 'Admin ID is required' });
     }
-    res.json(admin);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+
+    const admin = await Admin.findById(adminId); // Retrieve admin details for the specified adminId
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    res.status(200).json({ admin });
+  } catch (error) {
+    console.error('Error occurred while retrieving admin details:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

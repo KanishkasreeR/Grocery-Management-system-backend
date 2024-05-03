@@ -613,26 +613,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-router.get('/admin', async (req, res) => {
-  try {
-    const { adminId } = req.query; // Get adminId from query parameters
 
-    // Check if adminId is provided
-    if (!adminId) {
-      return res.status(400).json({ error: 'Admin ID is required' });
-    }
-
-    const admin = await Admin.findById(adminId); // Retrieve admin details for the specified adminId
-    if (!admin) {
-      return res.status(404).json({ error: 'Admin not found' });
-    }
-
-    res.status(200).json({ admin });
-  } catch (error) {
-    console.error('Error occurred while retrieving admin details:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 
 

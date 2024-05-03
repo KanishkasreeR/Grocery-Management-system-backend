@@ -5,7 +5,8 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 
 const auth = require("./authentication");
-const Admin = require("./Adminmodel"); // Update to Admin model
+const Admin = require("./Adminmodel");
+const User = require("./Usermodel");  // Update to Admin model
 
 
 
@@ -291,6 +292,101 @@ router.post("/Adminlogin", async (req, res) => {
 
 router.get("/me", auth, async (req, res) => {
   return res.status(200).json({ ...req.user._doc });
+});
+
+
+router.post("/UserRegister", async (req, res) => {
+  try {
+      const { name, email, password, contactNumber, address } = req.body;
+
+      // Validate request body
+      if (!name || !email || !password || !contactNumber || !address) {
+          return res.status(400).json({ error: `Please enter all the required fields.` });
+      }
+
+      // Other validation checks...
+      if (name.length > 25) {
+          return res.status(400).json({ error: "Name can only be less than 25 characters" });
+      }
+
+      const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailReg.test(email)) {
+          return res.status(400).json({ error: "Please enter a valid email address." });
+      }
+      if (password.length < 6) {
+          return res.status(400).json({ error: "Password must be at least 6 characters long" });
+      }
+
+      // Regular expression to validate Indian mobile number format
+      const mobileNumberRegEx = /^[6-9]\d{9}$/;
+      if (!mobileNumberRegEx.test(contactNumber)) {
+          return res.status(400).json({ error: "Please enter a valid Indian mobile number." });
+      }
+
+      const doesUserExist = await User.findOne({ email });
+      if (doesUserExist) {
+          return res.status(400).json({ error: "User with this email already exists." });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      // Create new User instance
+      const newUser = new User({
+          name,
+          email,
+          password: hashedPassword,
+          contactNumber,
+          address
+      });
+
+      // Save user to database
+      const result = await newUser.save();
+      result.password = undefined;
+
+      return res.status(201).json(result);
+  } catch (err) {
+      console.error('Error occurred during registration:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+router.post("/Userlogin", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Please enter all the required fields!" });
+  }
+
+  const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailReg.test(email)) {
+    return res.status(400).json({ error: "Please enter a valid email address." });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid email or password!" });
+    }
+
+    const doesPasswordMatch = await bcrypt.compare(password, user.password);
+
+    if (!doesPasswordMatch) {
+      return res.status(400).json({ error: "Invalid email or password!" });
+    }
+
+    const payload = { _id: user._id };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    const userData = { ...user._doc, password: undefined };
+    return res.status(200).json({ token, user: userData });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

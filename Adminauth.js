@@ -104,11 +104,11 @@ router.post("/Adminregister", async (req, res) => {
         if (doesAdminExist) {
             if (doesAdminExist.email === email) {
                 return res.status(400).json({
-                    error: "An admin with email ${email} already exists. Please use a different email.",
+                    error: `An admin with email ${email} already exists. Please use a different email.`,
                 });
             } else {
                 return res.status(400).json({
-                    error: "An admin with contact number ${contactNumber} already exists. Please use a different contact number.",
+                    error: `An admin with contact number ${contactNumber} already exists. Please use a different contact number.`,
                 });
             }
         }}catch(err){
@@ -386,6 +386,19 @@ router.post("/Userlogin", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/admin/:adminid', async (req, res) => {
+  const adminid = req.params.adminid;
+  try {
+    const admin = await Admin.findOne({ adminid: adminid });
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+    res.json(admin);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

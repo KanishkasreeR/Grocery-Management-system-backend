@@ -640,6 +640,28 @@ router.delete('/deleteproduct/:id', async (req, res) => {
 // });
 
 
+router.get('/search', async (req, res) => {
+  try {
+    const { keyword, adminId } = req.query;
+    let query = { adminId };
+
+    if (keyword) {
+      query.$or = [
+        { productName: { $regex: keyword, $options: 'i' } }, // Search product name
+        { category: { $regex: keyword, $options: 'i' } } // Search category
+      ];
+    }
+
+    const products = await Product.find(query);
+
+    res.status(200).json({ status: 'success', products });
+  } catch (error) {
+    console.error('Error occurred while searching products:', error);
+    res.status(500).json({ status: 'failure', message: 'Could not search products', error });
+  }
+});
+
+
 
 
 module.exports = router;

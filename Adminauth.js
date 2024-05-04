@@ -431,5 +431,16 @@ router.get('/customer', async (req, res) => {
   }
 });
 
+router.get('/admins', async (req, res) => {
+  try {
+    // Fetch all admins from the database
+    const admins = await Admin.find();
+    res.status(200).json(admins); // Respond with the admins in JSON format
+  } catch (error) {
+    console.error('Error fetching admins:', error);
+    res.status(500).json({ error: 'Internal server error' }); // Respond with an error if something goes wrong
+  }
+});
+
 
 module.exports = router;

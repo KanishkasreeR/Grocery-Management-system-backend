@@ -410,4 +410,26 @@ router.get('/admin', async (req, res) => {
   }
 });
 
+router.get('/customer', async (req, res) => {
+  try {
+    const { customerId } = req.query; // Get customerId from query parameters
+
+    // Check if customerId is provided
+    if (!customerId) {
+      return res.status(400).json({ error: 'Customer ID is required' });
+    }
+
+    const customer = await User.findById(customerId); // Retrieve customer details for the specified customerId
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    res.status(200).json({ customer });
+  } catch (error) {
+    console.error('Error occurred while retrieving customer details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 module.exports = router;

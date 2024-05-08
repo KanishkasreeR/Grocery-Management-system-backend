@@ -667,6 +667,17 @@ router.post('/addToWishlist', async (req, res) => {
   }
 });
 
+router.get('/wishlist', async (req, res) => {
+  try {
+    const { customerId } = req.query;
+    const wishlist = await wishlists.findOne({ customerId }).populate('products');
+    res.json(wishlist.products);
+  } catch (error) {
+    console.error('Error fetching wishlist products:', error);
+    res.status(500).json({ error: 'Failed to fetch wishlist products' });
+  }
+});
+
 
 module.exports = router;
 

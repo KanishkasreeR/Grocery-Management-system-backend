@@ -372,6 +372,7 @@ const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const Product = require('./addproduct.js'); // Import your Mongoose Product model
+const wishlists = require('./Wishlist.js');
 
 const router = express.Router();
 

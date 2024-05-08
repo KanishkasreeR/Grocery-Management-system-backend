@@ -615,7 +615,7 @@ router.get('/search', async (req, res) => {
 
 
 
-app.post('/addToWishlist', (req, res) => {
+router.post('/addToWishlist', (req, res) => {
   const { productId, customerId } = req.body;
   
   // Check if customerId exists in the wishlists object, if not, create an entry for the customer

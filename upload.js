@@ -373,6 +373,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const Product = require('./addproduct.js'); // Import your Mongoose Product model
 const wishlists = require('./Wishlist.js');
+const Cart = require('./Cart.js');
 
 const router = express.Router();
 
@@ -643,6 +644,37 @@ router.post('/addToWishlist', async (req, res) => {
   } catch (error) {
     console.error('Error adding product to wishlist:', error);
     res.status(500).json({ error: 'Failed to add product to wishlist' });
+  }
+});
+
+router.post('/addToCart', async (req, res) => {
+  try {
+    const { productId, customerId } = req.body;
+
+    // Check if the wishlist exists for the customer
+    let cart = await Cart.findOne({ customerId });
+
+    // If Cart doesn't exist, create a new one
+    if (!cart) {
+      cart = new Cart({ customerId, products: [] });
+    }
+
+    // Check if the product is already in the Cart
+    if (cart.products.includes(productId)) {
+      return res.status(400).json({ error: 'Product already exists in Cart' });
+    }
+
+    // Add the productId to the Cart
+    cart.products.push(productId);
+    
+    // Save the updated Cart
+    await cart.save();
+
+    // Respond with success message
+    res.status(200).json({ message: 'Product added to Cart successfully' });
+  } catch (error) {
+    console.error('Error adding product to Cart:', error);
+    res.status(500).json({ error: 'Failed to add product to Cart' });
   }
 });
 

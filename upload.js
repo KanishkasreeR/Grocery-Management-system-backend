@@ -692,13 +692,17 @@ router.get('/wishlist', async (req, res) => {
 router.get('/cart', async (req, res) => {
   try {
     const { customerId } = req.query;
-    const wishlist = await wishlists.findOne({ customerId }).populate('products');
-    res.json(wishlist.products);
+    const cart = await Cart.findOne({ customerId }).populate('products'); // Assuming the cart schema and model are named "Cart"
+    if (!cart) {
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+    res.json(cart.products);
   } catch (error) {
-    console.error('Error fetching wishlist products:', error);
-    res.status(500).json({ error: 'Failed to fetch wishlist products' });
+    console.error('Error fetching cart products:', error);
+    res.status(500).json({ error: 'Failed to fetch cart products' });
   }
 });
+
 
 router.get('/products/:productId', async (req, res) => {
   try {

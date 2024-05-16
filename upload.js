@@ -681,15 +681,23 @@ router.get('/search', async (req, res) => {
 router.post('/addToWishlist', async (req, res) => {
   try {
     const { productId, customerId, adminId } = req.body;
+    console.log(adminId);
+
+    // Check if any of the required values are missing
+    if (!productId || !customerId || !adminId) {
+      return res.status(400).json({ error: 'Missing productId, customerId, or adminId' });
+    }
 
     // Check if the wishlist exists for the customer
     let wishlist = await wishlists.findOne({ customerId });
 
     // If wishlist doesn't exist, create a new one
     if (!wishlist) {
-      wishlist = new wishlists({ customerId, adminId, products: [] });
+      wishlist = new wishlists({ customerId, products: [], adminId }); // Set adminId here
+      console.log(wishlist.adminId);
     }
-
+    console.log(wishlist);
+    console.log(wishlist.adminId);
     // Check if the product is already in the wishlist
     if (wishlist.products.includes(productId)) {
       return res.status(400).json({ error: 'Product already exists in wishlist' });
@@ -709,9 +717,15 @@ router.post('/addToWishlist', async (req, res) => {
   }
 });
 
+
 router.post('/addToCart', async (req, res) => {
   try {
     const { productId, customerId, adminId } = req.body;
+
+    // Check if any of the required values are missing
+    if (!productId || !customerId || !adminId) {
+      return res.status(400).json({ error: 'Missing productId, customerId, or adminId' });
+    }
 
     // Check if the cart exists for the customer
     let cart = await Cart.findOne({ customerId });
@@ -739,6 +753,7 @@ router.post('/addToCart', async (req, res) => {
     res.status(500).json({ error: 'Failed to add product to Cart' });
   }
 });
+
 
 
 router.get('/wishlist', async (req, res) => {

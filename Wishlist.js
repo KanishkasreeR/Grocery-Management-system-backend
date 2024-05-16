@@ -7,7 +7,10 @@ const wishlistSchema = new mongoose.Schema({
   },
   products: [{
     type: String, // Reference to the Product model
-  }]
+  }],
+  adminId:{
+    type: String,
+  }
 });
 
 // Create the Wishlist model

@@ -5,6 +5,9 @@ const CartSchema = new mongoose.Schema({
   customerId: {
     type: String,
   },
+  adminId:{
+    type: String,
+  },
   products: [{
     type: String, // Reference to the Product model
   }]

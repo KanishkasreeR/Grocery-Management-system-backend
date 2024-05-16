@@ -442,5 +442,19 @@ router.get('/admins', async (req, res) => {
   }
 });
 
+router.get('/admin/:adminId', async (req, res) => {
+  try {
+    const adminId = req.params.adminId;
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+    res.status(200).json({ admin });
+  } catch (error) {
+    console.error('Error fetching admin details:', error);
+    res.status(500).json({ error: 'Failed to fetch admin details' });
+  }
+});
+
 
 module.exports = router;

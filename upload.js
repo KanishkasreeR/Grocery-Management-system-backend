@@ -848,24 +848,31 @@ router.delete('/removecart/:customerId/:productId', async (req, res) => {
 });
 
 router.post('/orders', async (req, res) => {
-  const { customerId, products, adminId, totalPrice} = req.body;
+  const { customerId, products, adminId, totalPrice, adminNo } = req.body;
 
   const newOrder = new Order({
     customerId,
     products,
     adminId,
     totalPrice,
+    adminNo,
   });
 
   try {
+    // Save the new order
     const savedOrder = await newOrder.save();
+
+    // Remove products from cart
+    await Cart.updateOne(
+      { customerId },
+      { $pull: { products: { $in: products.map(p => p.productId) } } }
+    );
+
     res.status(201).json(savedOrder);
   } catch (error) {
     res.status(500).json({ message: 'Failed to create order', error });
   }
 });
-
-
 
 
 

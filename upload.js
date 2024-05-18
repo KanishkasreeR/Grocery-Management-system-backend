@@ -855,7 +855,6 @@ router.post('/orders', async (req, res) => {
     products,
     adminId,
     totalPrice,
-    adminNo,
   });
 
   try {

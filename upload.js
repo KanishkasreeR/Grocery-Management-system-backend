@@ -374,6 +374,7 @@ const cloudinary = require('cloudinary').v2;
 const Product = require('./addproduct.js'); // Import your Mongoose Product model
 const wishlists = require('./Wishlist.js');
 const Cart = require('./Cart.js');
+const Order = require('./OrderSchema.js')
 
 const router = express.Router();
 
@@ -845,6 +846,26 @@ router.delete('/removecart/:customerId/:productId', async (req, res) => {
     res.status(500).json({ error: 'Failed to remove product from wishlist' });
   }
 });
+
+router.post('/orders', async (req, res) => {
+  const { customerId, products, adminId, totalPrice} = req.body;
+
+  const newOrder = new Order({
+    customerId,
+    products,
+    adminId,
+    totalPrice,
+  });
+
+  try {
+    const savedOrder = await newOrder.save();
+    res.status(201).json(savedOrder);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create order', error });
+  }
+});
+
+
 
 
 

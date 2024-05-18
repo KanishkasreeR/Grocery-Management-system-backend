@@ -7,6 +7,7 @@ const cloudinary = require('cloudinary').v2;
 const auth = require("./authentication");
 const Admin = require("./Adminmodel");
 const User = require("./Usermodel");  // Update to Admin model
+const Order = require('./OrderSchema');
 
 
 
@@ -455,6 +456,7 @@ router.get('/admin/:adminId', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch admin details' });
   }
 });
+
 
 
 module.exports = router;

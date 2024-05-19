@@ -873,6 +873,36 @@ router.post('/orders', async (req, res) => {
   }
 });
 
+// router.get('/getorders', async (req, res) => {
+//   const { adminId } = req.query;
+
+//   try {
+//     const orders = await Order.find({ adminId });
+//     res.status(200).json(orders);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Failed to fetch orders', error });
+//   }
+// });
+
+router.get('/getorders', async (req, res) => {
+  const { adminId } = req.query;
+
+  try {
+    console.log(`Fetching orders for adminId: ${adminId}`);
+    const orders = await Order.find({ adminId });
+    console.log(`Fetched orders: ${JSON.stringify(orders)}`);
+    
+    if (orders.length === 0) {
+      console.log(`No orders found for adminId: ${adminId}`);
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ message: 'Failed to fetch orders', error });
+  }
+});
+
 
 
 module.exports = router;

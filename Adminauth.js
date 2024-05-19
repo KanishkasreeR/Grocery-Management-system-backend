@@ -457,6 +457,26 @@ router.get('/admin/:adminId', async (req, res) => {
   }
 });
 
+router.get('/getcustomer', async (req, res) => {
+  const { customerId } = req.query;
+
+  try {
+      console.log(`Fetching customer details for customerId: ${customerId}`);
+      const customer = await User.findById(customerId);
+      console.log(`Fetched customer: ${JSON.stringify(customer)}`);
+
+      if (!customer) {
+          console.log(`No customer found with customerId: ${customerId}`);
+          return res.status(404).json({ message: 'Customer not found' });
+      }
+
+      res.status(200).json(customer);
+  } catch (error) {
+      console.error('Error fetching customer details:', error);
+      res.status(500).json({ message: 'Failed to fetch customer details', error });
+  }
+});
+
 
 
 module.exports = router;

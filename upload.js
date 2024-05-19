@@ -755,6 +755,42 @@ router.post('/addToCart', async (req, res) => {
   }
 });
 
+router.post('/addToCart2', async (req, res) => {
+  try {
+    const { productId, customerId, adminId } = req.body;
+
+    // Check if any of the required values are missing
+    if (!productId || !customerId || !adminId) {
+      return res.status(400).json({ error: 'Missing productId, customerId, or adminId' });
+    }
+
+    // Check if the cart exists for the customer
+    let cart = await Cart.findOne({ customerId });
+
+    // If Cart doesn't exist, create a new one
+    if (!cart) {
+      cart = new Cart({ customerId, adminId, products: [] });
+    }
+
+    // Check if the product is already in the Cart
+    if (cart.products.includes(productId)) {
+      return res.status(400).json({ error: 'Product already exists in Cart' });
+    }
+
+    // Add the productId to the Cart
+    cart.products.push(productId);
+    
+    // Save the updated Cart
+    await cart.save();
+
+    // Respond with success message
+    res.status(200).json({ message: 'Product added to Cart successfully' });
+  } catch (error) {
+    console.error('Error adding product to Cart:', error);
+    res.status(500).json({ error: 'Failed to add product to Cart' });
+  }
+});
+
 
 
 router.get('/wishlist', async (req, res) => {
@@ -872,17 +908,6 @@ router.post('/orders', async (req, res) => {
     res.status(500).json({ message: 'Failed to create order', error });
   }
 });
-
-// router.get('/getorders', async (req, res) => {
-//   const { adminId } = req.query;
-
-//   try {
-//     const orders = await Order.find({ adminId });
-//     res.status(200).json(orders);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Failed to fetch orders', error });
-//   }
-// });
 
 router.get('/getorders', async (req, res) => {
   const { adminId } = req.query;

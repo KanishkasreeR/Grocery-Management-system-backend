@@ -928,6 +928,24 @@ router.get('/getorders', async (req, res) => {
   }
 });
 
+router.get('/getcustomerorders', async (req, res) => {
+  const { customerId } = req.query;
+
+  try {
+    console.log(`Fetching orders for customerId: ${customerId}`);
+    const orders = await Order.find({ customerId });
+    console.log(`Fetched orders: ${JSON.stringify(orders)}`);
+    
+    if (orders.length === 0) {
+      console.log(`No orders found for customerId: ${customerId}`);
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ message: 'Failed to fetch orders', error });
+  }
+});
 
 
 

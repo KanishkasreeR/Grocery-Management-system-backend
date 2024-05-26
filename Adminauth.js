@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
+const crypto = require('crypto');
 
 const auth = require("./authentication");
 const Admin = require("./Adminmodel");
@@ -474,6 +475,84 @@ router.get('/getcustomer', async (req, res) => {
   } catch (error) {
       console.error('Error fetching customer details:', error);
       res.status(500).json({ message: 'Failed to fetch customer details', error });
+  }
+});
+
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Please enter your email address.' });
+    }
+
+    let user = await User.findOne({ email });
+    let userType = 'user';
+
+    if (!user) {
+      user = await Admin.findOne({ email });
+      userType = 'admin';
+    }
+
+    if (!user) {
+      return res.status(400).json({ error: 'No user found with this email address.' });
+    }
+
+    const token = crypto.randomBytes(20).toString('hex');
+
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+    await user.save();
+
+    // Instead of sending an email, return the token in the response
+    res.status(200).json({ resetToken: token, message: 'Password reset token generated.', userType });
+  } catch (err) {
+    console.error('Error in forgot-password:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: 'Please provide the reset token and new password.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
+
+    let user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      user = await Admin.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() }
+      });
+    }
+
+    if (!user) {
+      return res.status(400).json({ error: 'Password reset token is invalid or has expired.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password has been reset.' });
+  } catch (err) {
+    console.error('Error in reset-password:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -88,7 +88,14 @@ const AdminSchema = new mongoose.Schema({
   storeImage: {
     type: String, // Assuming you'll store the image URL
     required: [true, "Store image is required."],
+  },resetPasswordToken: {
+    type: String,
+    default: null
   },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
+  }
 });
 
 const Admin = mongoose.model("Admin", AdminSchema);

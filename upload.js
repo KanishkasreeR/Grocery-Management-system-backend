@@ -947,6 +947,27 @@ router.get('/getcustomerorders', async (req, res) => {
   }
 });
 
+router.put('/editproduct2/:id', async (req, res) => {
+  const { productName, adminId, price, quantity, description, category, imageUrl } = req.body;
+
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { productName, adminId, price, quantity, description, category, imageUrl },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ status: 'failure', message: 'Product not found' });
+    }
+
+    res.status(200).json({ status: 'success', message: 'Product updated successfully', product: updatedProduct });
+  } catch (error) {
+    console.error('Error occurred while updating product:', error);
+    res.status(500).json({ status: 'failure', message: 'Could not update product', error: error });
+  }
+});
+
 
 
 

@@ -953,13 +953,14 @@ router.post('/orders', async (req, res) => {
     res.status(500).json({ message: 'Failed to create order', error });
   }
 });
+const Admin = require("./Adminmodel");
 
 require('dotenv').config({ path: "./config.env" });
 
 async function sendEmailToAdmin(userId, sellerId) {
   try {
     // Fetch seller details from the database
-    const seller = await User.findById(sellerId);
+    const seller = await Admin.findById(sellerId);
 
     // Create transporter
     const transporter = nodemailer.createTransport({

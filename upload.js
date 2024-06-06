@@ -944,8 +944,6 @@ router.post('/orders', async (req, res) => {
       { $pull: { products: { productId: { $in: productIds } } } }
     );
 
-   require('dotenv').config({ path: "./config.env" });
-
     // Send email to the admin
     await sendEmailToAdmin(customerId, adminId);
 
@@ -955,6 +953,8 @@ router.post('/orders', async (req, res) => {
     res.status(500).json({ message: 'Failed to create order', error });
   }
 });
+
+require('dotenv').config({ path: "./config.env" });
 
 async function sendEmailToAdmin(userId, sellerId) {
   try {

@@ -883,31 +883,108 @@ router.delete('/removecart/:customerId/:productId', async (req, res) => {
   }
 });
 
-router.post('/orders', async (req, res) => {
-  const { customerId, products, adminId, totalPrice, adminNo } = req.body;
+// router.post('/orders', async (req, res) => {
+//   const { customerId, products, adminId, totalPrice, adminNo } = req.body;
 
-  const newOrder = new Order({
-    customerId,
-    products,
-    adminId,
-    totalPrice,
-  });
+//   const newOrder = new Order({
+//     customerId,
+//     products,
+//     adminId,
+//     totalPrice,
+//   });
+
+//   try {
+//     // Save the new order
+//     const savedOrder = await newOrder.save();
+
+//     // Remove products from cart
+//     await Cart.updateOne(
+//       { customerId },
+//       { $pull: { products: { $in: products.map(p => p.productId) } } }
+//     );
+
+//     res.status(201).json(savedOrder);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Failed to create order', error });
+//   }
+// });
+
+const nodemailer = require('nodemailer');
+
+router.post('/orders', async (req, res) => {
+  const { customerId, adminId, products, totalPrice } = req.body;
 
   try {
+    // Validate the input data if necessary
+
+    // Create a new order
+    const newOrder = new Order({
+      customerId,
+      products: products.map(product => ({
+        productId: product.productId,
+        productName: product.productName,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        qunatity:product.quantity,
+        imageUrl: product.imageUrl
+      })),
+      adminId,
+      totalPrice,
+      orderDate: Date.now()
+    });
+
     // Save the new order
     const savedOrder = await newOrder.save();
 
     // Remove products from cart
+    const productIds = products.map(product => product.productId);
     await Cart.updateOne(
-      { customerId },
-      { $pull: { products: { $in: products.map(p => p.productId) } } }
+      { userId: customerId },
+      { $pull: { products: { productId: { $in: productIds } } } }
     );
+
+   require('dotenv').config({ path: "./config.env" });
+
+    // Send email to the admin
+    await sendEmailToAdmin(customerId, adminId);
 
     res.status(201).json(savedOrder);
   } catch (error) {
+    console.error('Error creating order:', error);
     res.status(500).json({ message: 'Failed to create order', error });
   }
 });
+
+async function sendEmailToAdmin(userId, sellerId) {
+  try {
+    // Fetch seller details from the database
+    const seller = await User.findById(sellerId);
+
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    // Email content
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: seller.email,
+      subject: 'New Order Notification',
+      text: `Dear ${seller.name},\n\nYou have a new order on your website. Please login to your account to view the details.\n\nBest regards,\nThe Team`
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+}
 
 router.get('/getorders', async (req, res) => {
   const { adminId } = req.query;

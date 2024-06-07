@@ -938,9 +938,14 @@ router.post('/orders', async (req, res) => {
     const savedOrder = await newOrder.save();
 
     // Remove products from cart
+    // const productIds = products.map(product => product.productId);
+    // await Cart.updateOne(
+    //   { userId: customerId },
+    //   { $pull: { products: { productId: { $in: productIds } } } }
+    // );
     const productIds = products.map(product => product.productId);
     await Cart.updateOne(
-      { userId: customerId },
+      { customerId: customerId }, // Corrected from 'userId' to 'customerId'
       { $pull: { products: { productId: { $in: productIds } } } }
     );
 

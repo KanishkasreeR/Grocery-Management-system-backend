@@ -911,6 +911,54 @@ router.delete('/removecart/:customerId/:productId', async (req, res) => {
 
 const nodemailer = require('nodemailer');
 
+// router.post('/orders', async (req, res) => {
+//   const { customerId, adminId, products, totalPrice } = req.body;
+
+//   try {
+//     // Validate the input data if necessary
+
+//     // Create a new order
+//     const newOrder = new Order({
+//       customerId,
+//       products: products.map(product => ({
+//         productId: product.productId,
+//         productName: product.productName,
+//         description: product.description,
+//         price: product.price,
+//         category: product.category,
+//         qunatity:product.quantity,
+//         imageUrl: product.imageUrl
+//       })),
+//       adminId,
+//       totalPrice,
+//       orderDate: Date.now()
+//     });
+
+//     // Save the new order
+//     const savedOrder = await newOrder.save();
+
+//     // Remove products from cart
+//     // const productIds = products.map(product => product.productId);
+//     // await Cart.updateOne(
+//     //   { userId: customerId },
+//     //   { $pull: { products: { productId: { $in: productIds } } } }
+//     // );
+//     const productIds = products.map(product => product.productId);
+//     await Cart.updateOne(
+//       { customerId: customerId }, // Corrected from 'userId' to 'customerId'
+//       { $pull: { products: { productId: { $in: productIds } } } }
+//     );
+
+//     // Send email to the admin
+//     await sendEmailToAdmin(customerId, adminId);
+
+//     res.status(201).json(savedOrder);
+//   } catch (error) {
+//     console.error('Error creating order:', error);
+//     res.status(500).json({ message: 'Failed to create order', error });
+//   }
+// });
+
 router.post('/orders', async (req, res) => {
   const { customerId, adminId, products, totalPrice } = req.body;
 
@@ -926,7 +974,7 @@ router.post('/orders', async (req, res) => {
         description: product.description,
         price: product.price,
         category: product.category,
-        qunatity:product.quantity,
+        quantity: product.quantity, // Corrected typo from qunatity to quantity
         imageUrl: product.imageUrl
       })),
       adminId,
@@ -938,14 +986,9 @@ router.post('/orders', async (req, res) => {
     const savedOrder = await newOrder.save();
 
     // Remove products from cart
-    // const productIds = products.map(product => product.productId);
-    // await Cart.updateOne(
-    //   { userId: customerId },
-    //   { $pull: { products: { productId: { $in: productIds } } } }
-    // );
     const productIds = products.map(product => product.productId);
     await Cart.updateOne(
-      { customerId: customerId }, // Corrected from 'userId' to 'customerId'
+      { customerId: customerId },
       { $pull: { products: { productId: { $in: productIds } } } }
     );
 

@@ -898,10 +898,10 @@ router.delete('/removecart/:customerId/:productId', async (req, res) => {
 //     const savedOrder = await newOrder.save();
 
 //     // Remove products from cart
-//     await Cart.updateOne(
-//       { customerId },
-//       { $pull: { products: { $in: products.map(p => p.productId) } } }
-//     );
+    // await Cart.updateOne(
+    //   { customerId },
+    //   { $pull: { products: { $in: products.map(p => p.productId) } } }
+    // );
 
 //     res.status(201).json(savedOrder);
 //   } catch (error) {

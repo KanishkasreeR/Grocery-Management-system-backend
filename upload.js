@@ -989,7 +989,7 @@ router.post('/orders', async (req, res) => {
     const productIds = products.map(product => product.productId);
     await Cart.updateOne(
       { customerId: customerId },
-      { $pull: { products: { productId: { $in: productIds } } } }
+      { $pull: { products: { $in: productIds }  } }
     );
 
     // Send email to the admin

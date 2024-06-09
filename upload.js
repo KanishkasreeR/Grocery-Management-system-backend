@@ -1034,7 +1034,7 @@ async function sendEmailToAdmin(userId, sellerId) {
     throw error;
   }
 }
-
+const User = require("./Usermodel"); 
 router.post('/update-order-status', async (req, res) => {
   const { userId, sellerId, orderId, action } = req.body;
 
@@ -1070,7 +1070,7 @@ async function sendEmail(userId, sellerId, orderId, action) {
     // Fetch seller details from the database
     const seller = await Admin.findById(sellerId);
     // Fetch customer details from the database
-    const customer = await Customer.findById(userId);
+    const customer = await User.findById(userId);
 
     // Create transporter
     const transporter = nodemailer.createTransport({

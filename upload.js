@@ -1035,6 +1035,70 @@ async function sendEmailToAdmin(userId, sellerId) {
   }
 }
 
+router.post('/update-order-status', async (req, res) => {
+  const { userId, sellerId, orderId, action } = req.body;
+
+  try {
+    // Update order status in the database
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (action === 'accept') {
+      order.status = 'Accepted';
+    } else if (action === 'decline') {
+      order.status = 'Declined';
+    } else {
+      return res.status(400).json({ message: 'Invalid action' });
+    }
+
+    await order.save();
+
+    // Send email to customer
+    await sendEmail(userId, sellerId, orderId, action);
+
+    res.status(200).json({ message: `Order ${action}ed successfully` });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+async function sendEmail(userId, sellerId, orderId, action) {
+  try {
+    // Fetch seller details from the database
+    const seller = await Admin.findById(sellerId);
+    // Fetch customer details from the database
+    const customer = await Customer.findById(userId);
+
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    // Determine email content based on action
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: customer.email,
+      subject: action === 'accept' ? 'Order Confirmation' : 'Order Declined',
+      text: action === 'accept' 
+        ? `Dear ${customer.name},\n\nYour order ${orderId} has been confirmed. Please log in to your account to view the details.\n\nBest regards,\n${seller.name}`
+        : `Dear ${customer.name},\n\nWe regret to inform you that your order ${orderId} has been declined.\nBest regards,\n${seller.name}`
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+}
+
 router.get('/getorders', async (req, res) => {
   const { adminId } = req.query;
 

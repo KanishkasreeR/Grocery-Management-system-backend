@@ -1,5 +1,6 @@
 
 require("dotenv").config({path : "./config.env"})
+require("dotenv").config({path : "./config2.env"})
 const express = require('express')
 const mongoos = require('mongoose')
 const bodyparser = require('body-parser')

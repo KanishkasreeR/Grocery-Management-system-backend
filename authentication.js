@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config({path : "./config.env"})
+require("dotenv").config({path : "./config2.env"})
 const User = require("./Adminmodel");
 
 module.exports = (req, res, next) => {

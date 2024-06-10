@@ -5,7 +5,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const crypto = require('crypto');
 
-require("dotenv").config({path : "./config.env"})
+require("dotenv").config({path : "./config2.env"})
 const auth = require("./authentication");
 const Admin = require("./Adminmodel");
 const User = require("./Usermodel");  // Update to Admin model

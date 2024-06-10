@@ -580,13 +580,41 @@ router.patch('/editproduct/:id', async (req, res) => {
 
 
 // Delete product endpoint
+// router.delete('/deleteproduct/:id', async (req, res) => {
+//   try {
+//     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+
+//     if (!deletedProduct) {
+//       return res.status(404).json({ status: 'failure', message: 'Product not found' });
+//     }
+
+//     res.status(200).json({ status: 'success', message: 'Product deleted successfully' });
+//   } catch (error) {
+//     console.error('Error occurred while deleting product:', error);
+//     res.status(500).json({ status: 'failure', message: 'Could not delete product', error: error });
+//   }
+// });
+
 router.delete('/deleteproduct/:id', async (req, res) => {
   try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    const productId = req.params.id;
+    const deletedProduct = await Product.findByIdAndDelete(productId);
 
     if (!deletedProduct) {
       return res.status(404).json({ status: 'failure', message: 'Product not found' });
     }
+
+    // Remove the product from all wishlists
+    await Wishlist.updateMany(
+      { products: productId },
+      { $pull: { products: productId } }
+    );
+
+    // Remove the product from all carts
+    await Cart.updateMany(
+      { products: productId },
+      { $pull: { products: productId } }
+    );
 
     res.status(200).json({ status: 'success', message: 'Product deleted successfully' });
   } catch (error) {

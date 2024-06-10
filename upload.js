@@ -605,7 +605,7 @@ router.delete('/deleteproduct/:id', async (req, res) => {
     }
 
     // Remove the product from all wishlists
-    await Wishlist.updateMany(
+    await wishlists.updateMany(
       { products: productId },
       { $pull: { products: productId } }
     );

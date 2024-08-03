@@ -11,26 +11,6 @@ const Admin = require("./Adminmodel");
 const User = require("./Usermodel");  // Update to Admin model
 const Order = require('./OrderSchema');
 
-
-
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, 'uploads/'); // Specify the directory where uploaded files should be stored
-//     },
-//     filename: function (req, file, cb) {
-//         cb(null, file.originalname); // Use the original file name
-//     }
-// });
-
-// const upload = multer({
-//     storage: storage,
-//     limits: {
-//         fileSize: 1024 * 1024 * 5 // Limit file size to 5MB
-//     }
-// }).single('storeImage'); // Expect a single file with the field name 'storeImage'
-
-// module.exports = upload;
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
@@ -147,112 +127,6 @@ router.post("/Adminregister", async (req, res) => {
       }
   });
 });
-
-
-
-// router.post("/Adminregister", async (req, res) => {
-//     const { name, email, password, storeName, storeAddress, contactNumber } = req.body;
-  
-//     if (!name || !email || !password || !storeName || !storeAddress || !contactNumber) {
-//       return res.status(400).json({ error: `Please enter all the required fields.` });
-//     }
-  
-//     if (name.length > 25) {
-//       return res.status(400).json({ error: "Name can only be less than 25 characters" });
-//     }
-  
-//     const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailReg.test(email)) {
-//       return res.status(400).json({ error: "Please enter a valid email address." });
-//     }
-  
-//     if (password.length < 6) {
-//       return res.status(400).json({ error: "Password must be at least 6 characters long" });
-//     }
-  
-//     // Regular expression to validate Indian mobile number format
-//     const mobileNumberRegEx = /^[6-9]\d{9}$/;
-//     if (!mobileNumberRegEx.test(contactNumber)) {
-//       return res.status(400).json({ error: "Please enter a valid Indian mobile number." });
-//     }
-  
-//     try {
-//       const doesAdminAlreadyExist = await Admin.findOne({ email });
-  
-//       if (doesAdminAlreadyExist) {
-//         return res.status(400).json({
-//           error: `An admin with email ${email} already exists. Please use a different email.`,
-//         });
-//       }
-  
-//       const hashedPassword = await bcrypt.hash(password, 12);
-//       const newAdmin = new Admin({ name, email, password: hashedPassword, storeName, storeAddress, contactNumber });
-  
-//       const result = await newAdmin.save();
-//       result._doc.password = undefined;
-  
-//       return res.status(201).json({ ...result._doc });
-//     } catch (err) {
-//       console.error(err);
-//       return res.status(500).json({ error: err.message });
-//     }
-//   });
-
-// router.post("/Adminregister", async (req, res) => {
-//     const { name, email, password, storeName, storeAddress, contactNumber } = req.body;
-  
-//     if (!name || !email || !password || !storeName || !storeAddress || !contactNumber) {
-//         return res.status(400).json({ error: `Please enter all the required fields.` });
-//     }
-  
-//     if (name.length > 25) {
-//         return res.status(400).json({ error: "Name can only be less than 25 characters" });
-//     }
-  
-//     const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailReg.test(email)) {
-//         return res.status(400).json({ error: "Please enter a valid email address." });
-//     }
-  
-//     if (password.length < 6) {
-//         return res.status(400).json({ error: "Password must be at least 6 characters long" });
-//     }
-  
-//     // Regular expression to validate Indian mobile number format
-//     const mobileNumberRegEx = /^[6-9]\d{9}$/;
-//     if (!mobileNumberRegEx.test(contactNumber)) {
-//         return res.status(400).json({ error: "Please enter a valid Indian mobile number." });
-//     }
-
-//     try {
-//         const doesAdminExist = await Admin.findOne({ $or: [{ email }, { contactNumber }] });
-
-//         if (doesAdminExist) {
-//             if (doesAdminExist.email === email) {
-//                 return res.status(400).json({
-//                     error: `An admin with email ${email} already exists. Please use a different email.`,
-//                 });
-//             } else {
-//                 return res.status(400).json({
-//                     error: `An admin with contact number ${contactNumber} already exists. Please use a different contact number.`,
-//                 });
-//             }
-//         }
-
-//         const hashedPassword = await bcrypt.hash(password, 12);
-//         const newAdmin = new Admin({ name, email, password: hashedPassword, storeName, storeAddress, contactNumber });
-
-//         const result = await newAdmin.save();
-//         result._doc.password = undefined;
-
-//         return res.status(201).json({ ...result._doc });
-//     } catch (err) {
-//         console.error(err);
-//         return res.status(500).json({ error: err.message });
-//     }
-// });
-
-  
 
 // Login Route
 router.post("/Adminlogin", async (req, res) => {

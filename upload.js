@@ -9,77 +9,62 @@ const Order = require('./OrderSchema.js')
 const router = express.Router();
 
 // Configure multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+const streamifier = require('streamifier');
 
-// Initialize Cloudinary
+// Cloudinary config
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Multer upload middleware
-const upload = multer({ storage: storage }).single('image');
-
-// Multer error handler middleware
-router.use(function(err, req, res, next) {
-  if (err instanceof multer.MulterError) {
-    console.error('Multer error:', err);
-    if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'File size too large. Maximum 5MB allowed.' });
-    } else {
-      return res.status(400).json({ error: 'File upload error' });
-    }
-  } else if (err) {
-    console.error('Unknown error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  } else {
-    next(); // No multer error, continue to next middleware
-  }
-});
-
+// Use memory storage for multer
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single('image');
 
 router.post('/upload', (req, res) => {
   upload(req, res, async (err) => {
-      if (err) {
-          console.error('Multer error:', err);
-          return res.status(400).json({ error: 'File upload error' });
-      }
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ error: 'File upload error' });
+    }
 
-      try {
-          const { productName, adminId, price, quantity, description, category } = req.body;
-          const image = req.file.path; // Path to the uploaded image file
+    try {
+      const { productName, adminId, price, quantity, description, category } = req.body;
 
-          // Upload image to Cloudinary
-          const cloudinaryResponse = await cloudinary.uploader.upload(image);
+      // Convert buffer to readable stream for Cloudinary
+      const streamUpload = () => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            (error, result) => {
+              if (result) resolve(result);
+              else reject(error);
+            }
+          );
+          streamifier.createReadStream(req.file.buffer).pipe(stream);
+        });
+      };
 
-          // Save product details to database
-          const product = new Product({
-              productName,
-              adminId, // Use the adminId received from frontend
-              price,
-              quantity,
-              description,
-              category,
-              imageUrl: cloudinaryResponse.url // Store the image URL from Cloudinary
-          });
-          await product.save();
+      const cloudinaryResponse = await streamUpload();
 
-          res.status(200).json({ message: 'Product added successfully' });
-      } catch (error) {
-          console.error('Error occurred while adding product:', error);
-          res.status(500).json({ error: 'Internal server error' });
-      }
+      const product = new Product({
+        productName,
+        adminId,
+        price,
+        quantity,
+        description,
+        category,
+        imageUrl: cloudinaryResponse.secure_url
+      });
+      await product.save();
+
+      res.status(200).json({ message: 'Product added successfully' });
+    } catch (error) {
+      console.error('Error occurred while adding product:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 });
-
 
 router.get('/products', async (req, res) => {
   try {
